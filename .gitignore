@@ -1,0 +1,8 @@
+.DS_Store
+**/.DS_Store
+
+node_modules/
+**/node_modules/
+
+dashboard-source/
+frontend-backup/
