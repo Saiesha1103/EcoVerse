@@ -20,6 +20,7 @@ export const useWorld = (): UseWorldResult => {
 
     try {
       const data = await getWorld();
+      console.log("WORLD DATA:", data);
       setWorld(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch world data");

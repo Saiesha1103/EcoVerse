@@ -127,7 +127,7 @@ export default function SimulationPage() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [simState.status, simState.speed]);
-
+console.log({ loading, world, error });
   // Loading state
   if (loading && !world) {
     return (
