@@ -1,7 +1,9 @@
 import random
 
 from app.models.cell import Cell
+from app.models.creature import Creature
 from app.models.world import World
+from app.services.simulation_service import set_world
 
 
 def generate_terrain():
@@ -81,13 +83,28 @@ def generate_world(width=20, height=20):
     """Generate a complete ecosystem world."""
 
     cells = []
+    next_creature_id = 1
 
     for y in range(height):
         for x in range(width):
 
             terrain = generate_terrain()
             resource = generate_resource(terrain)
-            creature = generate_creature(terrain)
+            species = generate_creature(terrain)
+
+            creature = None
+            if species is not None:
+                creature = Creature(
+                    id=next_creature_id,
+                    species=species,
+                    position_x=x,
+                    position_y=y,
+                    energy=100,
+                    hunger=0,
+                    thirst=0,
+                    alive=True
+                )
+                next_creature_id += 1
 
             cells.append(
                 Cell(
@@ -99,8 +116,12 @@ def generate_world(width=20, height=20):
                 )
             )
 
-    return World(
+    world = World(
         width=width,
         height=height,
         cells=cells
     )
+
+    set_world(world)
+
+    return world
