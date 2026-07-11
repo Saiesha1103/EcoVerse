@@ -12,16 +12,15 @@ import AlgorithmMonitor from "../components/dashboard/AlgorithmMonitor";
 import EventLog from "../components/dashboard/EventLog";
 import SimulationControls from "../components/dashboard/SimulationControls";
 import biomeDashboard from "../assets/biome-dashboard.png";
+import { useWorld } from "../hooks/useWorld";
+import { mapWorldToSimulationData } from "../utils/worldMapper";
 import {
   ALGORITHM_STATE,
-  CREATURES,
   EVENT_LOG,
   METRICS,
   POPULATION_TREND,
   RESOURCE_HEALTH,
-  RESOURCES,
   SELECTED_CREATURE_ID,
-  TERRAIN,
 } from "../data/mockSimulationData";
 import type {
   AlgorithmName,
@@ -65,6 +64,8 @@ const DEFAULT_SIM_STATE: SimulationState = {
 };
 
 export default function SimulationPage() {
+  const { world, loading, error, reloadWorld } = useWorld();
+
   const [controls, setControls] = useState<WorldControls>(DEFAULT_CONTROLS);
   const [selectedTool, setSelectedTool] = useState<ToolType>("select");
   const [selectedCreatureId, setSelectedCreatureId] = useState<string | null>(
@@ -103,6 +104,7 @@ export default function SimulationPage() {
       terrainDensity: Math.floor(30 + Math.random() * 60),
       obstacleDensity: Math.floor(10 + Math.random() * 40),
     });
+    reloadWorld();
   };
 
   // Tick timer — only runs while status is "running"
@@ -126,7 +128,52 @@ export default function SimulationPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [simState.status, simState.speed]);
 
-  const selectedCreature = CREATURES.find((c) => c.id === selectedCreatureId);
+  // Loading state
+  if (loading && !world) {
+    return (
+      <div className="relative flex min-h-screen items-center justify-center bg-transparent">
+        <Background />
+        <CursorSpotlight />
+        <div className="glass-strong relative z-10 rounded-2xl border border-white/10 px-8 py-6 text-center">
+          <div className="font-mono text-sm uppercase tracking-[0.22em] text-primary">
+            Loading World
+          </div>
+          <div className="mt-2 text-muted">Fetching simulation data from backend...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="relative flex min-h-screen items-center justify-center bg-transparent">
+        <Background />
+        <CursorSpotlight />
+        <div className="glass-strong relative z-10 max-w-md rounded-2xl border border-white/10 px-8 py-6 text-center">
+          <div className="font-mono text-sm uppercase tracking-[0.22em] text-red-400">
+            Failed to Load World
+          </div>
+          <div className="mt-2 text-muted">{error}</div>
+          <button
+            onClick={() => reloadWorld()}
+            className="mt-4 rounded-lg border border-white/10 bg-primary/20 px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-primary/30"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!world) {
+    return null;
+  }
+
+  const simulationData = mapWorldToSimulationData(world);
+  const selectedCreature = simulationData.creatures.find(
+    (c) => c.id === selectedCreatureId
+  );
 
   return (
     <div className="relative min-h-screen bg-transparent">
@@ -226,9 +273,9 @@ export default function SimulationPage() {
             key={terrainSeed}
           >
             <SimulationCanvas
-              terrain={TERRAIN}
-              creatures={CREATURES}
-              resources={RESOURCES}
+              terrain={simulationData.terrain}
+              creatures={simulationData.creatures}
+              resources={simulationData.resources}
               selectedCreatureId={selectedCreatureId}
               onSelectCreature={setSelectedCreatureId}
               selectedTool={selectedTool}
