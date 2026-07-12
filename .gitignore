@@ -6,3 +6,10 @@ node_modules/
 
 dashboard-source/
 frontend-backup/
+.vscode/
+**/__pycache__/
+*.py[cod]
+frontend/dist/
+backend/venv/
+.env
+**/.env

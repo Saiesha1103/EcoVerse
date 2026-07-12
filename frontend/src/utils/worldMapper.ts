@@ -1,9 +1,19 @@
-import { World } from "../types/world";
+import {
+  World,
+  Terrain,
+  CreatureSpecies,
+  Resource as BackendResource,
+} from "../types/world";
+
 import type {
   TerrainCell,
+  TerrainKind,
   Creature,
+  CreatureKind,
   Resource,
+  ResourceKind,
 } from "../types/simulation";
+
 
 export interface MappedWorld {
   terrain: TerrainCell[];
@@ -11,70 +21,97 @@ export interface MappedWorld {
   resources: Resource[];
 }
 
-export function mapWorldToSimulationData(world: World): MappedWorld {
+
+function mapTerrainKind(terrain: Terrain): TerrainKind {
+  switch (terrain) {
+    case "Forest":
+      return "forest";
+
+    case "Grassland":
+      return "grass";
+
+    case "River":
+      return "water";
+
+    case "Mountain":
+      return "rock";
+
+    case "Desert":
+      return "sand";
+  }
+}
+
+
+function mapResourceKind(
+  resource: Exclude<BackendResource, null>,
+): ResourceKind {
+  switch (resource) {
+    case "Water":
+      return "water";
+
+    case "Stone":
+      return "obstacle";
+
+    case "Berries":
+    case "Grass":
+    case "Cactus":
+      return "food";
+  }
+}
+
+
+function mapCreatureKind(
+  species: CreatureSpecies,
+): CreatureKind {
+  return species === "Wolf"
+    ? "predator"
+    : "herbivore";
+}
+
+
+export function mapWorldToSimulationData(
+  world: World,
+): MappedWorld {
   const terrain: TerrainCell[] = [];
   const creatures: Creature[] = [];
   const resources: Resource[] = [];
 
-  world.cells.forEach((cell) => {
-    // Terrain
+  for (const cell of world.cells) {
     terrain.push({
       x: cell.x,
       y: cell.y,
-      kind:
-        cell.terrain === "Forest"
-          ? "forest"
-          : cell.terrain === "Grassland"
-          ? "grass"
-          : cell.terrain === "River"
-          ? "water"
-          : cell.terrain === "Mountain"
-          ? "rock"
-          : "sand",
+      kind: mapTerrainKind(cell.terrain),
     });
 
-    // Resources
-    if (cell.resource) {
+    if (cell.resource !== null) {
       resources.push({
-        id: `resource-${cell.x}-${cell.y}`,
+        id: `resource-${cell.resource.toLowerCase()}-${cell.x}-${cell.y}`,
         x: cell.x,
         y: cell.y,
-        kind:
-          cell.resource === "Water"
-            ? "water"
-            : "food",
+        kind: mapResourceKind(cell.resource),
         level: 100,
       });
     }
 
-    // Creatures
-    if (cell.creature) {
+    const backendCreature = cell.creature;
+
+    if (backendCreature !== null) {
       creatures.push({
-        id: `creature-${cell.x}-${cell.y}`,
-
-        kind:
-          cell.creature === "Wolf"
-            ? "predator"
-            : "herbivore",
-
+        id: `creature-${backendCreature}-${cell.x}-${cell.y}`,
+        kind: mapCreatureKind(backendCreature),
         x: cell.x,
         y: cell.y,
-
         status: "Roaming",
-
         energy: 100,
         hunger: 0,
         thirst: 0,
-
         algorithm: "BFS",
-
         pathLength: 0,
         nodesExplored: 0,
-
         path: [],
       });
     }
-  });
+  }
 
   return {
     terrain,
