@@ -166,6 +166,7 @@ export default function SimulationPage() {
 
     reloadWorld();
   };
+  if (worldLoading && !world) {
     return (
       <div className="relative flex min-h-screen items-center justify-center bg-transparent">
         <Background />
