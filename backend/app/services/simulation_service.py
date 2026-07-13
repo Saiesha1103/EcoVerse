@@ -1,6 +1,8 @@
 import random
 
+
 from app.models.world import World
+from app.simulation.biome_config import BIOME_CONFIG
 
 current_world: World | None = None
 current_tick: int = 0
@@ -40,20 +42,9 @@ def reset() -> None:
 
 
 def is_valid_terrain(species: str, terrain: str) -> bool:
-    """
-    Return True only if the given species is allowed to occupy the
-    given terrain type.
-    """
-    allowed_terrain = {
-        "Rabbit": {"Forest", "Grassland"},
-        "Wolf": {"Forest", "Grassland"},
-        "Fish": {"River"},
-        "Goat": {"Mountain", "Grassland"},
-        "Camel": {"Desert", "Grassland"},
-    }
-
-    return terrain in allowed_terrain.get(species, set())
-
+    """Return True if the species is allowed in the given biome."""
+    allowed_species = BIOME_CONFIG.get(terrain, {}).get("allowed_species", [])
+    return species in allowed_species
 
 def move_creatures() -> None:
     """
@@ -235,17 +226,10 @@ def regenerate_resources() -> None:
         if cell.resource is not None:
             continue
 
-        if cell.terrain == "Forest":
-            cell.resource = "Berries"
+        resource = BIOME_CONFIG.get(cell.terrain, {}).get("resource")
 
-        elif cell.terrain == "Grassland":
-            cell.resource = "Grass"
-
-        elif cell.terrain == "River":
-            cell.resource = "Water"
-
-        elif cell.terrain == "Desert":
-            cell.resource = "Cactus"
+        if resource is not None:
+            cell.resource = resource
 
         
 def tick() -> World | None:

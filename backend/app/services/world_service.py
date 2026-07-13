@@ -5,6 +5,7 @@ from app.models.creature import Creature
 from app.models.world import World
 from app.services.simulation_service import set_world
 
+from app.simulation.biome_config import BIOME_CONFIG
 
 def generate_terrain():
     """Generate terrain using weighted probabilities."""
@@ -22,62 +23,17 @@ def generate_terrain():
 
 
 def generate_resource(terrain):
-    """Assign resources based on terrain."""
-
-    if terrain == "Forest":
-        return "Berries"
-
-    elif terrain == "Grassland":
-        return "Grass"
-
-    elif terrain == "River":
-        return "Water"
-
-    elif terrain == "Mountain":
-        return "Stone"
-
-    elif terrain == "Desert":
-        return "Cactus"
-
-    return None
-
+    """Assign resources based on biome configuration."""
+    return BIOME_CONFIG.get(terrain, {}).get("resource")
 
 def generate_creature(terrain):
-    """Spawn creatures based on terrain."""
+    """Spawn creatures based on biome configuration."""
+    allowed_species = BIOME_CONFIG.get(terrain, {}).get("allowed_species", [])
 
-    if terrain == "Forest":
-        return random.choice([
-            "Rabbit",
-            "Wolf",
-            None
-        ])
+    if not allowed_species:
+        return None
 
-    elif terrain == "Grassland":
-        return random.choice([
-            "Rabbit",
-            None
-        ])
-
-    elif terrain == "River":
-        return random.choice([
-            "Fish",
-            None
-        ])
-
-    elif terrain == "Mountain":
-        return random.choice([
-            "Goat",
-            None
-        ])
-
-    elif terrain == "Desert":
-        return random.choice([
-            "Camel",
-            None
-        ])
-
-    return None
-
+    return random.choice(allowed_species + [None])
 
 def generate_world(width=20, height=20):
     """Generate a complete ecosystem world."""
