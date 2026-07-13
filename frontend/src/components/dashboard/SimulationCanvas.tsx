@@ -126,6 +126,8 @@ export default function SimulationCanvas({
             <ResourceMarker
               key={resource.id}
               resource={resource}
+              gridWidth={gridWidth}
+              gridHeight={gridHeight}
             />
           ))}
 
@@ -137,6 +139,8 @@ export default function SimulationCanvas({
                 creature.id === selectedCreatureId
               }
               onSelect={onSelectCreature}
+              gridWidth={gridWidth}
+              gridHeight={gridHeight}
             />
           ))}
         </div>

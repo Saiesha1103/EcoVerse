@@ -1,18 +1,21 @@
 import { motion } from "framer-motion";
-import { GRID_HEIGHT, GRID_WIDTH } from "../../data/mockSimulationData";
 import type { Creature } from "../../types/simulation";
 
 export default function CreatureMarker({
   creature,
   selected,
   onSelect,
+  gridWidth,
+  gridHeight,
 }: {
   creature: Creature;
   selected: boolean;
   onSelect: (id: string) => void;
+  gridWidth: number;
+  gridHeight: number;
 }) {
-  const left = ((creature.x + 0.5) / GRID_WIDTH) * 100;
-  const top = ((creature.y + 0.5) / GRID_HEIGHT) * 100;
+  const left = ((creature.x + 0.5) / gridWidth) * 100;
+  const top = ((creature.y + 0.5) / gridHeight) * 100;
   const isPredator = creature.kind === "predator";
 
   return (

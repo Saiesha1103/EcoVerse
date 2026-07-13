@@ -1,12 +1,19 @@
 import { motion } from "framer-motion";
 import { GiPineTree } from "react-icons/gi";
 import { FiDroplet, FiSquare } from "react-icons/fi";
-import { GRID_HEIGHT, GRID_WIDTH } from "../../data/mockSimulationData";
 import type { Resource } from "../../types/simulation";
 
-export default function ResourceMarker({ resource }: { resource: Resource }) {
-  const left = ((resource.x + 0.5) / GRID_WIDTH) * 100;
-  const top = ((resource.y + 0.5) / GRID_HEIGHT) * 100;
+export default function ResourceMarker({
+  resource,
+  gridWidth,
+  gridHeight,
+}: {
+  resource: Resource;
+  gridWidth: number;
+  gridHeight: number;
+}) {
+  const left = ((resource.x + 0.5) / gridWidth) * 100;
+  const top = ((resource.y + 0.5) / gridHeight) * 100;
 
   if (resource.kind === "obstacle") {
     return (
