@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 
 import type {
+  BiomeType,
   Creature,
   Resource,
   SimulationState,
@@ -35,6 +36,8 @@ export default function SimulationCanvas({
   selectedTool,
   simState,
   biomeLabel,
+  biome,
+  visualSeed,
 }: {
   terrain: TerrainCell[];
   creatures: Creature[];
@@ -44,6 +47,8 @@ export default function SimulationCanvas({
   selectedTool: ToolType;
   simState: SimulationState;
   biomeLabel: string;
+  biome: BiomeType;
+  visualSeed: number;
 }) {
   const [hover, setHover] = useState({
     x: 0,
@@ -105,7 +110,11 @@ export default function SimulationCanvas({
 
         <div className="pointer-events-none absolute -bottom-20 -right-20 z-[1] h-64 w-64 rounded-full bg-cyan/10 blur-[100px]" />
 
-        <TerrainGrid cells={terrain} />
+        <TerrainGrid
+          cells={terrain}
+          biome={biome}
+          visualSeed={visualSeed}
+        />
 
         <div className="absolute inset-0 z-10">
           {selectedCreature?.path &&

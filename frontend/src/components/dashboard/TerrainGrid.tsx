@@ -1,25 +1,32 @@
 import { motion } from "framer-motion";
 import type {
   TerrainCell,
-  TerrainKind,
+  BiomeType,
 } from "../../types/simulation";
+import { BIOME_THEMES } from "../../data/biomeThemes";
+import { pickCellVariant } from "../../utils/biomeRandomizer";
 
 
-const TERRAIN_COLORS: Record<TerrainKind, string> = {
-  grass: "rgba(34,197,94,0.10)",
-  forest: "rgba(20,184,166,0.16)",
-  water: "rgba(6,182,212,0.22)",
-  sand: "rgba(245,158,11,0.10)",
-  rock: "rgba(148,163,184,0.10)",
-  snow: "rgba(248,250,252,0.14)",
-};
+function hexToRgba(hex: string, alpha: number): string {
+  const normalized = hex.replace("#", "");
+  const r = parseInt(normalized.substring(0, 2), 16);
+  const g = parseInt(normalized.substring(2, 4), 16);
+  const b = parseInt(normalized.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 
 export default function TerrainGrid({
   cells,
+  biome,
+  visualSeed,
 }: {
   cells: TerrainCell[];
+  biome: BiomeType;
+  visualSeed: number;
 }) {
+  const theme = BIOME_THEMES[biome];
+
   const gridWidth =
     cells.length > 0
       ? Math.max(...cells.map((cell) => cell.x)) + 1
@@ -41,17 +48,30 @@ export default function TerrainGrid({
         gridTemplateRows: `repeat(${gridHeight}, minmax(0, 1fr))`,
       }}
     >
-      {cells.map((cell) => (
-        <div
-          key={`${cell.x}-${cell.y}`}
-          className="border border-white/[0.02]"
-          style={{
-            backgroundColor: TERRAIN_COLORS[cell.kind],
-            gridColumnStart: cell.x + 1,
-            gridRowStart: cell.y + 1,
-          }}
-        />
-      ))}
+      {cells.map((cell) => {
+        const terrainStyle = theme.terrainStyles[cell.kind];
+        const variant = pickCellVariant(cell.x, cell.y, visualSeed, 3);
+        const backgroundColor = hexToRgba(terrainStyle.baseColor, 0.16);
+        const backgroundImage =
+          variant === 1
+            ? `linear-gradient(135deg, ${hexToRgba(terrainStyle.accentColor, 0.16)}, transparent 60%)`
+            : variant === 2
+            ? `linear-gradient(45deg, ${hexToRgba(terrainStyle.accentColor, 0.16)}, transparent 60%)`
+            : undefined;
+
+        return (
+          <div
+            key={`${cell.x}-${cell.y}`}
+            className="border border-white/[0.02]"
+            style={{
+              backgroundColor,
+              backgroundImage,
+              gridColumnStart: cell.x + 1,
+              gridRowStart: cell.y + 1,
+            }}
+          />
+        );
+      })}
     </motion.div>
   );
 }

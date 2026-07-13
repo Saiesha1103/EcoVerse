@@ -166,6 +166,7 @@ export default function SimulationPage() {
 
     reloadWorld();
   };
+
   if (worldLoading && !world) {
     return (
       <div className="relative flex min-h-screen items-center justify-center bg-transparent">
@@ -346,6 +347,8 @@ export default function SimulationPage() {
               selectedTool={selectedTool}
               simState={simState}
               biomeLabel={BIOME_LABELS[controls.biome]}
+              biome={controls.biome}
+              visualSeed={0}
             />
 
             <SelectedCreatureCard
