@@ -126,7 +126,6 @@ export default function SimulationCanvas({
             <ResourceMarker
               key={resource.id}
               resource={resource}
-               biome={biome}
             />
           ))}
 

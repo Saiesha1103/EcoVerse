@@ -1,15 +1,10 @@
 import { motion } from "framer-motion";
+import { GiPineTree } from "react-icons/gi";
+import { FiDroplet, FiSquare } from "react-icons/fi";
 import { GRID_HEIGHT, GRID_WIDTH } from "../../data/mockSimulationData";
-import type { BiomeType, Resource } from "../../types/simulation";
-import { ResourceSprite } from "../sprites/ResourceSprite";
+import type { Resource } from "../../types/simulation";
 
-export default function ResourceMarker({
-  resource,
-  biome,
-}: {
-  resource: Resource;
-  biome: BiomeType;
-}) {
+export default function ResourceMarker({ resource }: { resource: Resource }) {
   const left = ((resource.x + 0.5) / GRID_WIDTH) * 100;
   const top = ((resource.y + 0.5) / GRID_HEIGHT) * 100;
 
@@ -20,11 +15,7 @@ export default function ResourceMarker({
         style={{ left: `${left}%`, top: `${top}%` }}
         aria-label={`Obstacle ${resource.id}`}
       >
-        <ResourceSprite
-          kind={resource.kind}
-          biome={biome}
-          className="h-4 w-4"
-        />
+        <FiSquare className="h-2.5 w-2.5" />
       </div>
     );
   }
@@ -43,15 +34,11 @@ export default function ResourceMarker({
         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
       />
       <span
-        className={`relative flex h-4 w-4 items-center justify-center rounded-full ${
+        className={`relative flex h-3 w-3 items-center justify-center rounded-full ${
           isFood ? "bg-lime/80 text-[#0B1220]" : "bg-cyan/80 text-[#0B1220]"
         }`}
       >
-        <ResourceSprite
-          kind={resource.kind}
-          biome={biome}
-          className="h-4 w-4"
-        />
+        {isFood ? <GiPineTree className="h-2 w-2" /> : <FiDroplet className="h-2 w-2" />}
       </span>
     </motion.div>
   );
