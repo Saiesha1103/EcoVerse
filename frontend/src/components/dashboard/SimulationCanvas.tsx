@@ -137,6 +137,8 @@ export default function SimulationCanvas({
                 creature.id === selectedCreatureId
               }
               onSelect={onSelectCreature}
+              biome={biome}
+              visualSeed={visualSeed}
             />
           ))}
         </div>
