@@ -1,20 +1,15 @@
 import { motion } from "framer-motion";
 import { GRID_HEIGHT, GRID_WIDTH } from "../../data/mockSimulationData";
-import type { BiomeType, Creature } from "../../types/simulation";
-import { CreatureSprite } from "../sprites/CreatureSprite";
+import type { Creature } from "../../types/simulation";
 
 export default function CreatureMarker({
   creature,
   selected,
   onSelect,
-  biome,
-  visualSeed,
 }: {
   creature: Creature;
   selected: boolean;
   onSelect: (id: string) => void;
-  biome: BiomeType;
-  visualSeed: number;
 }) {
   const left = ((creature.x + 0.5) / GRID_WIDTH) * 100;
   const top = ((creature.y + 0.5) / GRID_HEIGHT) * 100;
@@ -40,14 +35,10 @@ export default function CreatureMarker({
           transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
         />
       )}
-      <CreatureSprite
-        id={creature.id}
-        kind={creature.kind}
-        biome={biome}
-        visualSeed={visualSeed}
-        className={`relative h-4 w-4 rounded-full ring-2 ring-background ${
-          selected ? "shadow-[0_0_10px_rgba(34,197,94,0.9)]" : ""
-        }`}
+      <span
+        className={`relative h-2 w-2 rounded-full ring-2 ring-background ${
+          isPredator ? "bg-[#F59E0B]" : "bg-primary"
+        } ${selected ? "shadow-[0_0_10px_rgba(34,197,94,0.9)]" : ""}`}
       />
     </motion.button>
   );
