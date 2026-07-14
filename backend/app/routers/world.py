@@ -1,15 +1,12 @@
 from fastapi import APIRouter
 
-from app.models.world import World
-from app.services.world_service import get_current_world
-
+from app.services.world_service import generate_world
 
 router = APIRouter(
     prefix="/world",
-    tags=["World"],
+    tags=["World"]
 )
 
-
-@router.get("/", response_model=World)
-def get_world() -> World:
-    return get_current_world()
+@router.get("/")
+def get_world():
+    return generate_world()
