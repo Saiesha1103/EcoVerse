@@ -1,18 +1,9 @@
 from collections import deque
 
 
-def bfs(grid, start, goal):
+def bfs(grid, start, goal, is_walkable):
     """
     Find the shortest path from start to goal using Breadth-First Search.
-
-    Parameters:
-        grid: Dictionary mapping (x, y) -> Cell
-        start: (x, y)
-        goal: (x, y)
-
-    Returns:
-        List of coordinates representing the shortest path,
-        or an empty list if no path exists.
     """
 
     queue = deque([start])
@@ -28,10 +19,10 @@ def bfs(grid, start, goal):
         x, y = current
 
         neighbours = [
-            (x, y - 1),  # Up
-            (x, y + 1),  # Down
-            (x - 1, y),  # Left
-            (x + 1, y),  # Right
+            (x, y - 1),
+            (x, y + 1),
+            (x - 1, y),
+            (x + 1, y),
         ]
 
         for neighbour in neighbours:
@@ -40,7 +31,7 @@ def bfs(grid, start, goal):
 
             cell = grid[neighbour]
 
-            if cell.creature is not None:
+            if neighbour != goal and not is_walkable(cell):
                 continue
 
             if neighbour not in visited:

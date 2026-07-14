@@ -1,4 +1,5 @@
 from app.services.simulation_service import get_world, get_tick
+from app.services.pathfinding_service import get_algorithm
 
 
 PREDATOR_SPECIES = {"Wolf"}
@@ -8,7 +9,7 @@ WATER_RESOURCES = {"Water"}
 TERRAIN_TYPES = ["Forest", "Grassland", "River", "Mountain", "Desert"]
 
 
-def generate_analytics() -> dict:
+def get_analytics() -> dict:
     """
     Compute a snapshot of ecosystem analytics for the current
     simulation state: population counts, energy averages, resource
@@ -78,4 +79,5 @@ def generate_analytics() -> dict:
         "food_resources": food_resource_count,
         "water_resources": water_resource_count,
         "terrain": terrain_counts,
+        "algorithm": get_algorithm(),
     }

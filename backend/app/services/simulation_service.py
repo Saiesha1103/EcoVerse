@@ -1,5 +1,5 @@
 import random
-
+from app.services.pathfinding_service import find_path
 
 from app.models.world import World
 from app.simulation.biome_config import BIOME_CONFIG
@@ -45,18 +45,85 @@ def is_valid_terrain(species: str, terrain: str) -> bool:
     """Return True if the species is allowed in the given biome."""
     allowed_species = BIOME_CONFIG.get(terrain, {}).get("allowed_species", [])
     return species in allowed_species
+def is_walkable(cell) -> bool:
+    return cell.creature is None
+def find_nearest_resource(start_pos, resource_name):
+    if current_world is None:
+        return None
+
+    nearest = None
+    best_distance = float("inf")
+
+    for cell in current_world.cells:
+        if cell.resource != resource_name:
+            continue
+
+        distance = abs(cell.x - start_pos[0]) + abs(cell.y - start_pos[1])
+
+        if distance < best_distance:
+            best_distance = distance
+            nearest = (cell.x, cell.y)
+
+    return nearest
+def find_nearest_creature(start_pos, species):
+    if current_world is None:
+        return None
+
+    nearest = None
+    best_distance = float("inf")
+
+    for cell in current_world.cells:
+        if cell.creature is None:
+            continue
+
+        if cell.creature.species != species:
+            continue
+
+        distance = abs(cell.x - start_pos[0]) + abs(cell.y - start_pos[1])
+
+        if distance < best_distance:
+            best_distance = distance
+            nearest = (cell.x, cell.y)
+
+    return nearest
+def predator_attack():
+    if current_world is None:
+        return
+
+    cell_map = {(cell.x, cell.y): cell for cell in current_world.cells}
+
+    for cell in current_world.cells:
+        predator = cell.creature
+
+        if predator is None or predator.species != "Wolf":
+            continue
+
+        neighbours = [
+            (cell.x, cell.y - 1),
+            (cell.x, cell.y + 1),
+            (cell.x - 1, cell.y),
+            (cell.x + 1, cell.y),
+        ]
+
+        for pos in neighbours:
+            if pos not in cell_map:
+                continue
+
+            target = cell_map[pos].creature
+
+            if (
+                target is not None
+                and target.alive
+                and target.species in {"Rabbit", "Goat", "Camel"}
+            ):
+                target.alive = False
+                predator.energy = min(predator.energy + 30, 100)
+                break
 
 def move_creatures() -> None:
     """
-    Move each creature currently on the board to a random valid
-    neighbouring cell (up, down, left, right), staying within the
-    world boundaries, never moving onto a cell already occupied
-    by another creature, and only moving onto terrain that is
-    valid for that creature's species.
-
-    If no valid neighbour exists, the creature stays where it is.
-
-    Terrain and resources are left untouched.
+    Move each creature one step towards its target using the
+    currently selected pathfinding algorithm.
     """
     if current_world is None:
         return
@@ -64,34 +131,32 @@ def move_creatures() -> None:
     width = current_world.width
     height = current_world.height
 
-    # Map coordinates to their cell for O(1) neighbour lookups.
     cell_map = {(cell.x, cell.y): cell for cell in current_world.cells}
 
-    # Track occupied positions.
     occupied = {
         (cell.x, cell.y)
         for cell in current_world.cells
         if cell.creature is not None
     }
 
-    # Snapshot creatures so each moves only once.
     creature_cells = [
-        cell for cell in current_world.cells
+        cell
+        for cell in current_world.cells
         if cell.creature is not None
     ]
 
     for cell in creature_cells:
-        # Skip empty or dead creatures
+
         if cell.creature is None or not cell.creature.alive:
             continue
 
         x, y = cell.x, cell.y
 
         candidate_positions = [
-            (x, y - 1),  # up
-            (x, y + 1),  # down
-            (x - 1, y),  # left
-            (x + 1, y),  # right
+            (x, y - 1),
+            (x, y + 1),
+            (x - 1, y),
+            (x + 1, y),
         ]
 
         valid_neighbours = [
@@ -102,24 +167,72 @@ def move_creatures() -> None:
                 and 0 <= pos[1] < height
                 and pos in cell_map
                 and pos not in occupied
-                and is_valid_terrain(cell.creature.species, cell_map[pos].terrain)
+                and is_valid_terrain(
+                    cell.creature.species,
+                    cell_map[pos].terrain,
+                )
             )
         ]
 
         if not valid_neighbours:
-            # No valid neighbour; creature stays where it is.
             continue
 
-        target_cell = random.choice(valid_neighbours)
+        goal = None
 
-        # Keep reference to creature object
+        if cell.creature.species == "Rabbit":
+            goal = (
+                find_nearest_resource((x, y), "Grass")
+                or find_nearest_resource((x, y), "Berries")
+            )
+
+        elif cell.creature.species == "Goat":
+            goal = (
+                find_nearest_resource((x, y), "Grass")
+                or find_nearest_resource((x, y), "Berries")
+            )
+
+        elif cell.creature.species == "Camel":
+            goal = (
+                find_nearest_resource((x, y), "Water")
+                or find_nearest_resource((x, y), "Cactus")
+            )
+
+        elif cell.creature.species == "Wolf":
+            goal = find_nearest_creature((x, y), "Rabbit")
+
+        if goal is not None:
+
+            path = find_path(
+                cell_map,
+                (x, y),
+                goal,
+                lambda c: (
+                    c.creature is None
+                    and is_valid_terrain(
+                        cell.creature.species,
+                        c.terrain,
+                    )
+                ),
+            )
+
+            if len(path) >= 2:
+                next_pos = path[1]
+
+                if next_pos in cell_map and next_pos not in occupied:
+                    target_cell = cell_map[next_pos]
+                else:
+                    target_cell = random.choice(valid_neighbours)
+            else:
+                target_cell = random.choice(valid_neighbours)
+
+        else:
+            target_cell = random.choice(valid_neighbours)
+
         creature = cell.creature
 
-        # Update creature's internal position
         creature.position_x = target_cell.x
         creature.position_y = target_cell.y
 
-        # Move creature
         target_cell.creature = creature
         cell.creature = None
 
@@ -143,12 +256,15 @@ def update_creature_states() -> None:
         if creature is None or not creature.alive:
             continue
 
-        creature.energy -= 1
-        creature.hunger += 1
-        creature.thirst += 1
+        creature.energy = max(0, creature.energy - 1)
+        creature.hunger = min(100, creature.hunger + 1)
+        creature.thirst = min(100, creature.thirst + 1)
 
-        if creature.energy <= 0:
-            creature.energy = 0
+        if  (
+            creature.energy <= 0
+            or creature.hunger >= 100
+            or creature.thirst >= 100
+        ):
             creature.alive = False
 def process_resources() -> None:
     """
@@ -209,12 +325,6 @@ def remove_dead_creatures() -> None:
             creature.position_y = -1
             cell.creature = None
 def regenerate_resources() -> None:
-    """
-    Regenerate ecosystem resources every 10 ticks.
-
-    Existing resources are never overwritten.
-    """
-
     if current_world is None:
         return
 
@@ -226,12 +336,16 @@ def regenerate_resources() -> None:
         if cell.resource is not None:
             continue
 
+        if cell.creature is not None:
+            continue
+
         resource = BIOME_CONFIG.get(cell.terrain, {}).get("resource")
 
-        if resource is not None:
-            cell.resource = resource
+        if resource is None:
+            continue
 
-        
+        if random.random() < 0.35:
+            cell.resource = resource
 def tick() -> World | None:
     """
     Advance the simulation by one tick.
@@ -248,13 +362,15 @@ def tick() -> World | None:
         return None
 
     current_tick += 1
+
     move_creatures()
+    predator_attack()
     update_creature_states()
     process_resources()
     remove_dead_creatures()
     regenerate_resources()
-    return current_world
 
+    return current_world
 
 def is_running() -> bool:
     """Return whether the simulation is currently running."""

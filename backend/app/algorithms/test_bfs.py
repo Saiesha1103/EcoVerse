@@ -12,6 +12,11 @@ grid = {
     (2, 0): MockCell(),
 }
 
-path = bfs(grid, (0, 0), (2, 0))
+path = bfs(
+    grid,
+    (0, 0),
+    (2, 0),
+    lambda cell: True,
+)
 
 print(path)
