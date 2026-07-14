@@ -1,8 +1,11 @@
 import random
 
 from app.models.cell import Cell
+from app.models.creature import Creature
 from app.models.world import World
+from app.services.simulation_service import set_world
 
+from app.simulation.biome_config import BIOME_CONFIG
 
 _current_world: World | None = None
 
@@ -21,6 +24,7 @@ def generate_terrain() -> str:
     )[0]
 
 
+<<<<<<< HEAD
 def generate_resource(terrain: str) -> str | None:
     resources = {
         "Forest": "Berries",
@@ -43,14 +47,54 @@ def generate_creature(terrain: str) -> str | None:
     }
 
     return random.choice(creatures.get(terrain, [None]))
+=======
+def generate_resource(terrain):
+    """Assign resources based on biome configuration."""
+    return BIOME_CONFIG.get(terrain, {}).get("resource")
 
+def generate_creature(terrain):
+    """Spawn creatures based on biome configuration."""
+    allowed_species = BIOME_CONFIG.get(terrain, {}).get("allowed_species", [])
 
+    if not allowed_species:
+        return None
+>>>>>>> origin/backend-dev
+
+    return random.choice(allowed_species + [None])
+
+<<<<<<< HEAD
 def generate_world(width: int = 20, height: int = 20) -> World:
     cells: list[Cell] = []
+=======
+def generate_world(width=20, height=20):
+    """Generate a complete ecosystem world."""
+
+    cells = []
+    next_creature_id = 1
+>>>>>>> origin/backend-dev
 
     for y in range(height):
         for x in range(width):
             terrain = generate_terrain()
+<<<<<<< HEAD
+=======
+            resource = generate_resource(terrain)
+            species = generate_creature(terrain)
+
+            creature = None
+            if species is not None:
+                creature = Creature(
+                    id=next_creature_id,
+                    species=species,
+                    position_x=x,
+                    position_y=y,
+                    energy=100,
+                    hunger=0,
+                    thirst=0,
+                    alive=True
+                )
+                next_creature_id += 1
+>>>>>>> origin/backend-dev
 
             cells.append(
                 Cell(
@@ -62,9 +106,10 @@ def generate_world(width: int = 20, height: int = 20) -> World:
                 )
             )
 
-    return World(
+    world = World(
         width=width,
         height=height,
+<<<<<<< HEAD
         cells=cells,
     )
 
@@ -125,5 +170,11 @@ def tick_world() -> World:
             target_cell.creature = source_cell.creature
             source_cell.creature = None
             break
+=======
+        cells=cells
+    )
+
+    set_world(world)
+>>>>>>> origin/backend-dev
 
     return world

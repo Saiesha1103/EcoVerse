@@ -1,14 +1,11 @@
 from fastapi import APIRouter
+from app.services.analytics_service import get_analytics
 
 router = APIRouter(
     prefix="/analytics",
-    tags=["Analytics"]
+    tags=["Analytics"],
 )
 
 @router.get("/")
 def analytics():
-    return {
-        "population": 1,
-        "food": 100,
-        "water": 100
-    }
+    return get_analytics()
