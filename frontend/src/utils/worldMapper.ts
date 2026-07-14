@@ -97,8 +97,8 @@ export function mapWorldToSimulationData(
 
     if (backendCreature !== null) {
       creatures.push({
-        id: `creature-${backendCreature}-${cell.x}-${cell.y}`,
-        kind: mapCreatureKind(backendCreature),
+        id: `creature-${backendCreature.id}`,
+        kind: mapCreatureKind(backendCreature.species),
         x: cell.x,
         y: cell.y,
         status: "Roaming",

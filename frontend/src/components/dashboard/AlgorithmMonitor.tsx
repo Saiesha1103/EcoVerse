@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { FiCpu } from "react-icons/fi";
 import type { AlgorithmName, AlgorithmState } from "../../types/simulation";
 
-const ALGORITHMS: AlgorithmName[] = ["BFS", "DFS", "Dijkstra"];
+const ALGORITHMS: AlgorithmName[] = ["BFS", "A*"];
 
 const NODES = [
   { x: 10, y: 20 }, { x: 30, y: 12 }, { x: 50, y: 24 }, { x: 70, y: 10 },

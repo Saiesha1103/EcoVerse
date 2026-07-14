@@ -56,7 +56,7 @@ export interface Resource {
   level?: number;
 }
 
-export type AlgorithmName = "BFS" | "DFS" | "Dijkstra";
+export type AlgorithmName = "BFS" | "A*";
 
 export interface AlgorithmState {
   active: AlgorithmName;

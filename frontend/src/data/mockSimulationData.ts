@@ -79,7 +79,7 @@ export const CREATURES: Creature[] = [
     hunger: 42,
     thirst: 31,
     targetId: "F-03",
-    algorithm: "Dijkstra",
+    algorithm: "A*",
     pathLength: 11,
     nodesExplored: 28,
     path: [
@@ -89,15 +89,15 @@ export const CREATURES: Creature[] = [
     ],
   },
   { id: "H-01", kind: "herbivore", x: 4, y: 5, status: "Roaming", energy: 91, hunger: 12, thirst: 18, algorithm: "BFS", pathLength: 0, nodesExplored: 0 },
-  { id: "H-02", kind: "herbivore", x: 20, y: 4, status: "Seeking Water", energy: 55, hunger: 38, thirst: 64, algorithm: "Dijkstra", pathLength: 6, nodesExplored: 14 },
+  { id: "H-02", kind: "herbivore", x: 20, y: 4, status: "Seeking Water", energy: 55, hunger: 38, thirst: 64, algorithm: "A*", pathLength: 6, nodesExplored: 14 },
   { id: "H-03", kind: "herbivore", x: 7, y: 10, status: "Resting", energy: 84, hunger: 20, thirst: 22, algorithm: "BFS", pathLength: 0, nodesExplored: 0 },
-  { id: "H-04", kind: "herbivore", x: 25, y: 6, status: "Roaming", energy: 67, hunger: 33, thirst: 40, algorithm: "DFS", pathLength: 4, nodesExplored: 9 },
-  { id: "H-05", kind: "herbivore", x: 2, y: 18, status: "Seeking Food", energy: 48, hunger: 61, thirst: 35, targetId: "F-05", algorithm: "Dijkstra", pathLength: 3, nodesExplored: 7 },
-  { id: "H-06", kind: "herbivore", x: 28, y: 16, status: "Fleeing", energy: 39, hunger: 44, thirst: 30, algorithm: "DFS", pathLength: 5, nodesExplored: 11 },
+  { id: "H-04", kind: "herbivore", x: 25, y: 6, status: "Roaming", energy: 67, hunger: 33, thirst: 40, algorithm: "BFS", pathLength: 4, nodesExplored: 9 },
+  { id: "H-05", kind: "herbivore", x: 2, y: 18, status: "Seeking Food", energy: 48, hunger: 61, thirst: 35, targetId: "F-05", algorithm: "A*", pathLength: 3, nodesExplored: 7 },
+  { id: "H-06", kind: "herbivore", x: 28, y: 16, status: "Fleeing", energy: 39, hunger: 44, thirst: 30, algorithm: "BFS", pathLength: 5, nodesExplored: 11 },
   { id: "H-07", kind: "herbivore", x: 11, y: 20, status: "Roaming", energy: 72, hunger: 25, thirst: 28, algorithm: "BFS", pathLength: 0, nodesExplored: 0 },
-  { id: "P-02", kind: "predator", x: 23, y: 14, status: "Hunting", energy: 58, hunger: 70, thirst: 20, targetId: "H-06", algorithm: "Dijkstra", pathLength: 8, nodesExplored: 22 },
+  { id: "P-02", kind: "predator", x: 23, y: 14, status: "Hunting", energy: 58, hunger: 70, thirst: 20, targetId: "H-06", algorithm: "A*", pathLength: 8, nodesExplored: 22 },
   { id: "P-01", kind: "predator", x: 8, y: 3, status: "Roaming", energy: 66, hunger: 45, thirst: 33, algorithm: "BFS", pathLength: 0, nodesExplored: 0 },
-  { id: "P-03", kind: "predator", x: 19, y: 20, status: "Resting", energy: 80, hunger: 30, thirst: 25, algorithm: "DFS", pathLength: 0, nodesExplored: 0 },
+  { id: "P-03", kind: "predator", x: 19, y: 20, status: "Resting", energy: 80, hunger: 30, thirst: 25, algorithm: "BFS", pathLength: 0, nodesExplored: 0 },
 ];
 
 export const SELECTED_CREATURE_ID = "H-08";
@@ -134,7 +134,7 @@ export const POPULATION_TREND: PopulationTrendPoint[] = [
 ];
 
 export const ALGORITHM_STATE: AlgorithmState = {
-  active: "Dijkstra",
+  active: "A*",
   agentId: "H-08",
   targetId: "F-03",
   nodesExplored: 28,

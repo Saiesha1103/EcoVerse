@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { changeAlgorithm } from "../services/api";
 import Background from "../components/Background";
 import CursorSpotlight from "../components/CursorSpotlight";
 import DashboardNavbar from "../components/dashboard/DashboardNavbar";
@@ -15,6 +16,7 @@ import biomeDashboard from "../assets/biome-dashboard.png";
 import { useWorld } from "../hooks/useWorld";
 import { useSimulation } from "../hooks/useSimulation";
 import { mapWorldToSimulationData } from "../utils/worldMapper";
+import { useAnalytics } from "../hooks/useAnalytics";
 import {
   ALGORITHM_STATE,
   EVENT_LOG,
@@ -25,6 +27,8 @@ import {
 } from "../data/mockSimulationData";
 import type {
   AlgorithmName,
+  ResourceHealthRow,
+  SimulationMetrics,
   SimulationSpeed,
   SimulationState,
   ToolType,
@@ -83,6 +87,13 @@ export default function SimulationPage() {
     reset,
   } = useSimulation();
 
+  const{
+    analytics,
+    error: analyticsError,
+    refreshAnalytics,
+  }= useAnalytics();
+  
+
   const [controls, setControls] =
     useState<WorldControls>(DEFAULT_CONTROLS);
 
@@ -101,7 +112,37 @@ export default function SimulationPage() {
   const [terrainSeed, setTerrainSeed] = useState(0);
 
   const world = updatedWorld ?? initialWorld;
-  const error = worldError ?? simulationError;
+  const error = worldError ?? simulationError ?? analyticsError;
+
+  const liveMetrics: SimulationMetrics = analytics
+  ? {
+      totalPopulation: analytics.population,
+      herbivores: analytics.herbivores,
+      predators: analytics.predators,
+      foodAvailability: analytics.food_resources,
+      waterAvailability: analytics.water_resources,
+      averageEnergy: Math.round(analytics.average_energy),
+      deaths: analytics.dead,
+      currentTick: analytics.tick,
+    }
+  : METRICS;
+
+const liveResourceHealth: ResourceHealthRow[] = analytics
+  ? [
+      {
+        label: "Food",
+        kind: "food",
+        value: analytics.food_resources,
+        status: "Healthy",
+      },
+      {
+        label: "Water",
+        kind: "water",
+        value: analytics.water_resources,
+        status: "Healthy",
+      },
+    ]
+  : RESOURCE_HEALTH;
 
   useEffect(() => {
     setSimState((currentState) => ({
@@ -136,10 +177,12 @@ export default function SimulationPage() {
 
   const handleStep = async (): Promise<void> => {
     await step();
+    await refreshAnalytics();
   };
 
   const handleReset = async (): Promise<void> => {
     await reset();
+    await refreshAnalytics();
 
     setSimState((currentState) => ({
       ...DEFAULT_SIM_STATE,
@@ -148,6 +191,16 @@ export default function SimulationPage() {
 
     setSelectedCreatureId(null);
   };
+
+  const handleAlgorithmChange = async (
+  selectedAlgorithm: AlgorithmName,
+): Promise<void> => {
+  await changeAlgorithm(
+    selectedAlgorithm === "A*" ? "astar" : "bfs",
+  );
+  setAlgorithm(selectedAlgorithm);
+  await refreshAnalytics();
+};
 
   const handleSpeedChange = (speed: SimulationSpeed): void => {
     setSimState((currentState) => ({
@@ -293,10 +346,10 @@ export default function SimulationPage() {
 
             <div className="absolute bottom-5 left-5 right-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {[
-                ["Population", METRICS.totalPopulation],
-                ["Herbivores", METRICS.herbivores],
-                ["Predators", METRICS.predators],
-                ["Water", `${METRICS.waterAvailability}%`],
+                ["Population", liveMetrics.totalPopulation],
+                ["Herbivores", liveMetrics.herbivores],
+                ["Predators", liveMetrics.predators],
+                ["Water", `${liveMetrics.waterAvailability}%`],
               ].map(([label, value]) => (
                 <div
                   key={label}
@@ -364,8 +417,8 @@ export default function SimulationPage() {
             className="order-3 lg:h-[calc(100vh-140px)]"
           >
             <AnalyticsPanel
-              metrics={METRICS}
-              resourceHealth={RESOURCE_HEALTH}
+              metrics={liveMetrics}
+              resourceHealth={liveResourceHealth}
             />
           </motion.div>
         </div>
@@ -383,7 +436,9 @@ export default function SimulationPage() {
               ...ALGORITHM_STATE,
               active: algorithm,
             }}
-            onSelectAlgorithm={setAlgorithm}
+            onSelectAlgorithm={(algo) => {
+              void handleAlgorithmChange(algo);
+              }}
           />
 
           <EventLog entries={EVENT_LOG} />

@@ -20,7 +20,7 @@ export interface Cell {
   y: number;
   terrain: Terrain;
   resource: Resource;
-  creature: CreatureSpecies | null;
+  creature: Creature | null;
 }
 
 export interface World {

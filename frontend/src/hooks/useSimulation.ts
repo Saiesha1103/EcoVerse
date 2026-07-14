@@ -144,6 +144,16 @@ export function useSimulation(): UseSimulationResult {
   }, []);
 
   useEffect(() => {
+  if (!simulationState.running) return;
+
+  const interval = window.setInterval(() => {
+    void step();
+  }, 1000);
+
+  return () => window.clearInterval(interval);
+}, [simulationState.running, step]);
+
+  useEffect(() => {
     refreshState();
   }, [refreshState]);
 
