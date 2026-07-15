@@ -71,3 +71,19 @@ def test_analytics():
     assert "herbivores" in data
     assert "average_energy" in data
     assert "tick" in data
+def test_multiple_ticks():
+    client.get("/world/")
+    client.post("/simulation/reset")
+    client.post("/simulation/start")
+
+    for _ in range(20):
+        response = client.post("/simulation/tick")
+        assert response.status_code == 200
+
+    analytics = client.get("/analytics/")
+
+    assert analytics.status_code == 200
+    data = analytics.json()
+
+    assert data["tick"] >= 20
+    assert data["population"] >= 0

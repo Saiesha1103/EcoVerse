@@ -324,6 +324,67 @@ def remove_dead_creatures() -> None:
             creature.position_x = -1
             creature.position_y = -1
             cell.creature = None
+def reproduce_creatures() -> None:
+    """Allow healthy herbivores to reproduce into adjacent empty cells."""
+    if current_world is None:
+        return
+
+    herbivores = {"Rabbit", "Goat", "Camel"}
+    cell_map = {(cell.x, cell.y): cell for cell in current_world.cells}
+
+    for cell in list(current_world.cells):
+        creature = cell.creature
+
+        if (
+            creature is None
+            or not creature.alive
+            or creature.species not in herbivores
+        ):
+            continue
+
+        if (
+            creature.energy < 80
+            or creature.hunger > 20
+            or creature.thirst > 20
+        ):
+            continue
+
+        neighbours = [
+            (cell.x + 1, cell.y),
+            (cell.x - 1, cell.y),
+            (cell.x, cell.y + 1),
+            (cell.x, cell.y - 1),
+        ]
+
+        random.shuffle(neighbours)
+
+        for pos in neighbours:
+            target = cell_map.get(pos)
+
+            if target is None:
+                continue
+
+            if target.creature is not None:
+                continue
+
+            if not is_valid_terrain(creature.species, target.terrain):
+                continue
+
+            from app.models.creature import Creature
+
+            target.creature = Creature(
+                id=random.randint(100000, 999999),
+                species=creature.species,
+                position_x=target.x,
+                position_y=target.y,
+                energy=50,
+                hunger=20,
+                thirst=20,
+                alive=True,
+            )
+
+            creature.energy -= 20
+            break
 def regenerate_resources() -> None:
     if current_world is None:
         return
@@ -367,6 +428,7 @@ def tick() -> World | None:
     predator_attack()
     update_creature_states()
     process_resources()
+    reproduce_creatures()
     remove_dead_creatures()
     regenerate_resources()
 
