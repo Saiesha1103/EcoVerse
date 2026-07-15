@@ -7,7 +7,7 @@ from app.simulation.biome_config import BIOME_CONFIG
 current_world: World | None = None
 current_tick: int = 0
 running: bool = False
-simulation_speed: int = 1
+simulation_speed: float = 1.0
 
 
 def set_world(world: World) -> None:
@@ -382,7 +382,7 @@ def get_tick() -> int:
     return current_tick
 
 
-def set_speed(speed: int) -> None:
+def set_speed(speed: float) -> None:
     """Set the simulation speed."""
     global simulation_speed
     simulation_speed = speed

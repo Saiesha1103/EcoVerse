@@ -52,6 +52,12 @@ export const getWorld = async (): Promise<World> => {
   return response.data;
 };
 
+export const setSimulationSpeed = async (
+  speed: number,
+): Promise<void> => {
+  await apiClient.post("/simulation/speed", { speed });
+};
+
 export const startSimulation = async (): Promise<SimulationState> => {
   const response =
     await apiClient.post<SimulationState>("/simulation/start");

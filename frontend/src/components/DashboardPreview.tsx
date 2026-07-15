@@ -11,10 +11,10 @@ import {
 import { FadeInSection, SectionHeading } from "./ui";
 
 const STATS = [
-  { label: "Population", value: "1,842", icon: FiUsers, tone: "text-primary" },
+  { label: "Population", value: "42", icon: FiUsers, tone: "text-primary" },
   { label: "Food", value: "68%", icon: FiPackage, tone: "text-accent" },
   { label: "Water", value: "74%", icon: FiDroplet, tone: "text-secondary" },
-  { label: "Current Tick", value: "#48,213", icon: FiClock, tone: "text-primary" },
+  { label: "Current Tick", value: "#128", icon: FiClock, tone: "text-primary" },
 ];
 
 const BARS = [38, 52, 44, 61, 55, 70, 64, 78, 72, 85, 80, 92];
@@ -102,6 +102,9 @@ export default function DashboardPreview() {
                 <div className="mb-4 flex items-center justify-between">
                   <span className="text-xs font-semibold uppercase tracking-wider text-muted">
                     Simulation Grid
+                    <span className="text-[10px] font-mono text-muted">
+                      DEMO PREVIEW
+                    </span>
                   </span>
                   <span className="font-mono-data text-xs text-primary">
                     live

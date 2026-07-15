@@ -26,6 +26,9 @@ router = APIRouter(
 class AlgorithmRequest(BaseModel):
     algorithm: str
 
+class SpeedRequest(BaseModel):
+    speed: float
+
 
 @router.post("/start")
 def start_simulation():
@@ -48,6 +51,14 @@ def reset_simulation():
     reset()
     return {
         "status": "reset"
+    }
+
+@router.post("/speed")
+def update_speed(request: SpeedRequest):
+    set_speed(request.speed)
+    return {
+        "status": "success",
+        "speed": get_speed(),
     }
 
 

@@ -4,12 +4,10 @@ import { FadeInSection, GlassCard, SectionHeading } from "./ui";
 const BUILDERS = [
   {
     name: "Utkarsh Sinha",
-    role: "Frontend Engineer",
     icon: FiCode,
   },
   {
     name: "Saiesha Krishnan",
-    role: "Backend & Simulation Engineer",
     icon: FiDatabase,
   },
 ];
@@ -36,7 +34,6 @@ export default function Builders() {
                 <div>
                   <div className="font-semibold text-ink">{builder.name}</div>
                   <div className="mt-1 text-xs text-muted">
-                    {builder.role}
                   </div>
                 </div>
               </GlassCard>

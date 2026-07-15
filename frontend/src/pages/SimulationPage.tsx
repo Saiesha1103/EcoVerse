@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { changeAlgorithm } from "../services/api";
+import {
+  changeAlgorithm,
+  setSimulationSpeed,
+} from "../services/api";
 import Background from "../components/Background";
 import CursorSpotlight from "../components/CursorSpotlight";
 import DashboardNavbar from "../components/dashboard/DashboardNavbar";
 import WorldControlPanel from "../components/dashboard/WorldControlPanel";
 import SimulationCanvas from "../components/dashboard/SimulationCanvas";
+import PopulationTrend from "../components/dashboard/PopulationTrend";
 import SelectedCreatureCard from "../components/dashboard/SelectedCreatureCard";
 import AnalyticsPanel from "../components/dashboard/AnalyticsPanel";
-import PopulationTrend from "../components/dashboard/PopulationTrend";
 import AlgorithmMonitor from "../components/dashboard/AlgorithmMonitor";
 import EventLog from "../components/dashboard/EventLog";
 import SimulationControls from "../components/dashboard/SimulationControls";
@@ -26,6 +29,7 @@ import {
   SELECTED_CREATURE_ID,
 } from "../data/mockSimulationData";
 import type {
+  PopulationTrendPoint,
   AlgorithmName,
   ResourceHealthRow,
   SimulationMetrics,
@@ -109,6 +113,9 @@ export default function SimulationPage() {
   const [algorithm, setAlgorithm] =
     useState<AlgorithmName>(ALGORITHM_STATE.active);
 
+  const [populationTrend, setPopulationTrend] =
+  useState<PopulationTrendPoint[]>([]);
+
   const [terrainSeed, setTerrainSeed] = useState(0);
 
   const world = updatedWorld ?? initialWorld;
@@ -143,6 +150,27 @@ const liveResourceHealth: ResourceHealthRow[] = analytics
       },
     ]
   : RESOURCE_HEALTH;
+
+useEffect(() => {
+  if (!analytics) return;
+
+  const point: PopulationTrendPoint = {
+    tick: analytics.tick,
+    total: analytics.population,
+    herbivores: analytics.herbivores,
+    predators: analytics.predators,
+  };
+
+  setPopulationTrend((current) => {
+    const withoutSameTick = current.filter(
+      (item) => item.tick !== point.tick,
+    );
+
+    return [...withoutSameTick, point]
+      .sort((a, b) => a.tick - b.tick)
+      .slice(-20);
+  });
+}, [analytics]);
 
   useEffect(() => {
     setSimState((currentState) => ({
@@ -202,12 +230,30 @@ const liveResourceHealth: ResourceHealthRow[] = analytics
   await refreshAnalytics();
 };
 
-  const handleSpeedChange = (speed: SimulationSpeed): void => {
-    setSimState((currentState) => ({
-      ...currentState,
-      speed,
-    }));
-  };
+  const handleSpeedChange = async (
+  speed: SimulationSpeed,
+): Promise<void> => {
+  await setSimulationSpeed(speed);
+
+  setSimState((currentState) => ({
+    ...currentState,
+    speed,
+  }));
+};
+
+  useEffect(() => {
+  if (!backendSimulationState.running) return;
+
+  const intervalId = window.setInterval(() => {
+    void refreshAnalytics();
+  }, Math.max(250, 1000 / simState.speed));
+
+  return () => window.clearInterval(intervalId);
+}, [
+  backendSimulationState.running,
+  refreshAnalytics,
+  simState.speed,
+]);
 
   const handleRandomize = (): void => {
     setTerrainSeed((currentSeed) => currentSeed + 1);
@@ -429,7 +475,7 @@ const liveResourceHealth: ResourceHealthRow[] = analytics
           transition={{ duration: 0.5, delay: 0.25 }}
           className="grid grid-cols-1 gap-3 lg:grid-cols-[1fr_1fr_1fr]"
         >
-          <PopulationTrend data={POPULATION_TREND} />
+          <PopulationTrend data={populationTrend} />
 
           <AlgorithmMonitor
             state={{

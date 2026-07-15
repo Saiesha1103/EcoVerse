@@ -13,6 +13,16 @@ const HEIGHT = 120;
 const PAD = 8;
 
 function buildPath(points: PopulationTrendPoint[], key: keyof PopulationTrendPoint, max: number) {
+  if (points.length === 0) return "";
+
+if (points.length === 1) {
+  const y =
+    HEIGHT -
+    PAD -
+    (Number(points[0][key]) / max) * (HEIGHT - PAD * 2);
+
+  return `M${WIDTH / 2},${y.toFixed(1)} L${WIDTH / 2},${y.toFixed(1)}`;
+}
   return points
     .map((p, i) => {
       const x = PAD + (i / (points.length - 1)) * (WIDTH - PAD * 2);
@@ -24,6 +34,13 @@ function buildPath(points: PopulationTrendPoint[], key: keyof PopulationTrendPoi
 
 export default function PopulationTrend({ data }: { data: PopulationTrendPoint[] }) {
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  if (data.length === 0) {
+  return (
+    <div className="glass rounded-2xl p-5 text-sm text-muted">
+      Population history will appear after the first tick.
+    </div>
+  );
+}
   const max = Math.max(...data.map((d) => d.total)) * 1.2;
   const active = hoverIdx !== null ? data[hoverIdx] : data[data.length - 1];
 
